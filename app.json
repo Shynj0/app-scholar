@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "App Scholar",
+    "slug": "app-scholar",
+    "version": "1.0.0",
+    "entryPoint": "./App.js", 
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTabletMode": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
