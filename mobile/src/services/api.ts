@@ -8,7 +8,7 @@ import { Platform } from 'react-native';
 //  • Emulador iOS:      http://localhost:3000
 //  • Dispositivo real:  http://SEU_IP_LOCAL:3000  (ex: http://192.168.1.10:3000)
 // ──────────────────────────────────────────────────────────────────────────────
-const BASE_URL = 'http://192.168.1.66:3000';
+const BASE_URL = 'https://app-scholar-x8c0.onrender.com';
 
 export { BASE_URL };
 
