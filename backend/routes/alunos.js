@@ -1,14 +1,14 @@
-const express = require('express');
-const router = express.Router();
-const ctrl = require('../controllers/alunosController');
-const { autenticar } = require('../middleware/auth');
+const router = require('express').Router();
+const auth   = require('../middleware/auth');
+const ctrl   = require('../controllers/alunosController');
 
-router.get('/', autenticar, ctrl.listar);
-router.get('/cep/:cep', ctrl.buscarCep);                      // público — ViaCEP
-router.get('/matricula/:matricula', autenticar, ctrl.buscarPorMatricula);
-router.get('/:id', autenticar, ctrl.buscarPorId);
-router.post('/', autenticar, ctrl.criar);
-router.put('/:id', autenticar, ctrl.atualizar);
-router.delete('/:id', autenticar, ctrl.remover);
+router.use(auth); // todas protegidas
+
+router.get('/',                      ctrl.getAll);
+router.get('/matricula/:matricula',  ctrl.getByMatricula);
+router.get('/:id',                   ctrl.getById);
+router.post('/',                     ctrl.create);
+router.put('/:id',                   ctrl.update);
+router.delete('/:id',                ctrl.remove);
 
 module.exports = router;

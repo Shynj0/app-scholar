@@ -1,108 +1,73 @@
 const pool = require('../database/connection');
 
-// GET /api/disciplinas
-const listar = async (req, res) => {
+exports.getAll = async (req, res) => {
   try {
-    const result = await pool.query(`
-      SELECT d.*, p.nome AS professor_nome
+    const { rows } = await pool.query(`
+      SELECT d.*, p.nome as professor_nome
       FROM disciplinas d
       LEFT JOIN professores p ON d.professor_id = p.id
-      ORDER BY d.semestre ASC, d.nome ASC
+      ORDER BY d.semestre, d.nome
     `);
-    return res.json(result.rows);
-  } catch (err) {
-    console.error('Erro ao listar disciplinas:', err);
-    return res.status(500).json({ erro: 'Erro interno do servidor.' });
+    res.json({ success: true, data: rows });
+  } catch {
+    res.status(500).json({ success: false, message: 'Erro ao listar disciplinas' });
   }
 };
 
-// GET /api/disciplinas/:id
-const buscarPorId = async (req, res) => {
-  const { id } = req.params;
+exports.getById = async (req, res) => {
   try {
-    const result = await pool.query(`
-      SELECT d.*, p.nome AS professor_nome
-      FROM disciplinas d
-      LEFT JOIN professores p ON d.professor_id = p.id
-      WHERE d.id = $1
-    `, [id]);
-    if (result.rows.length === 0) {
-      return res.status(404).json({ erro: 'Disciplina não encontrada.' });
-    }
-    return res.json(result.rows[0]);
-  } catch (err) {
-    console.error('Erro ao buscar disciplina:', err);
-    return res.status(500).json({ erro: 'Erro interno do servidor.' });
+    const { rows } = await pool.query(`
+      SELECT d.*, p.nome as professor_nome
+      FROM disciplinas d LEFT JOIN professores p ON d.professor_id = p.id
+      WHERE d.id=$1
+    `, [req.params.id]);
+    if (!rows.length) return res.status(404).json({ success: false, message: 'Disciplina não encontrada' });
+    res.json({ success: true, data: rows[0] });
+  } catch {
+    res.status(500).json({ success: false, message: 'Erro ao buscar disciplina' });
   }
 };
 
-// POST /api/disciplinas
-const criar = async (req, res) => {
+exports.create = async (req, res) => {
   const { nome, carga_horaria, professor_id, curso, semestre } = req.body;
 
-  if (!nome || !carga_horaria || !curso || !semestre) {
-    return res.status(400).json({
-      erro: 'Campos obrigatórios: nome, carga horária, curso e semestre.',
-    });
-  }
+  if (!nome || !carga_horaria || !curso || !semestre)
+    return res.status(400).json({ success: false, message: 'Nome, carga horária, curso e semestre são obrigatórios' });
 
   try {
-    const result = await pool.query(
-      `INSERT INTO disciplinas (nome, carga_horaria, professor_id, curso, semestre)
-       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+    const { rows } = await pool.query(
+      `INSERT INTO disciplinas (nome,carga_horaria,professor_id,curso,semestre)
+       VALUES ($1,$2,$3,$4,$5) RETURNING *`,
       [nome, carga_horaria, professor_id || null, curso, semestre]
     );
-    return res.status(201).json({
-      mensagem: 'Disciplina cadastrada com sucesso.',
-      disciplina: result.rows[0],
-    });
+    res.status(201).json({ success: true, message: 'Disciplina cadastrada com sucesso!', data: rows[0] });
   } catch (err) {
-    console.error('Erro ao criar disciplina:', err);
-    return res.status(500).json({ erro: 'Erro interno do servidor.' });
+    console.error('[disciplinasController.create]', err);
+    res.status(500).json({ success: false, message: 'Erro ao cadastrar disciplina' });
   }
 };
 
-// PUT /api/disciplinas/:id
-const atualizar = async (req, res) => {
-  const { id } = req.params;
+exports.update = async (req, res) => {
   const { nome, carga_horaria, professor_id, curso, semestre } = req.body;
-
   try {
-    const result = await pool.query(
-      `UPDATE disciplinas SET
-        nome = COALESCE($1, nome),
-        carga_horaria = COALESCE($2, carga_horaria),
-        professor_id = COALESCE($3, professor_id),
-        curso = COALESCE($4, curso),
-        semestre = COALESCE($5, semestre)
-       WHERE id = $6 RETURNING *`,
-      [nome, carga_horaria, professor_id, curso, semestre, id]
+    const { rows } = await pool.query(
+      `UPDATE disciplinas SET nome=$1,carga_horaria=$2,professor_id=$3,curso=$4,semestre=$5
+       WHERE id=$6 RETURNING *`,
+      [nome, carga_horaria, professor_id, curso, semestre, req.params.id]
     );
-    if (result.rows.length === 0) {
-      return res.status(404).json({ erro: 'Disciplina não encontrada.' });
-    }
-    return res.json({ mensagem: 'Disciplina atualizada.', disciplina: result.rows[0] });
-  } catch (err) {
-    console.error('Erro ao atualizar disciplina:', err);
-    return res.status(500).json({ erro: 'Erro interno do servidor.' });
+    if (!rows.length) return res.status(404).json({ success: false, message: 'Disciplina não encontrada' });
+    res.json({ success: true, message: 'Disciplina atualizada!', data: rows[0] });
+  } catch {
+    res.status(500).json({ success: false, message: 'Erro ao atualizar disciplina' });
   }
 };
 
-// DELETE /api/disciplinas/:id
-const remover = async (req, res) => {
-  const { id } = req.params;
+exports.remove = async (req, res) => {
   try {
-    const result = await pool.query(
-      'DELETE FROM disciplinas WHERE id = $1 RETURNING id', [id]
-    );
-    if (result.rows.length === 0) {
-      return res.status(404).json({ erro: 'Disciplina não encontrada.' });
-    }
-    return res.json({ mensagem: 'Disciplina removida com sucesso.' });
-  } catch (err) {
-    console.error('Erro ao remover disciplina:', err);
-    return res.status(500).json({ erro: 'Erro interno do servidor.' });
+    const { rows } = await pool.query('DELETE FROM disciplinas WHERE id=$1 RETURNING id', [req.params.id]);
+    if (!rows.length) return res.status(404).json({ success: false, message: 'Disciplina não encontrada' });
+    res.json({ success: true, message: 'Disciplina removida com sucesso' });
+  } catch {
+    res.status(500).json({ success: false, message: 'Erro ao remover disciplina' });
   }
 };
-
-module.exports = { listar, buscarPorId, criar, atualizar, remover };

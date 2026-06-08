@@ -1,8 +1,9 @@
-const express = require('express');
-const router = express.Router();
-const { buscarBoletim } = require('../controllers/boletimController');
-const { autenticar } = require('../middleware/auth');
+const router = require('express').Router();
+const auth   = require('../middleware/auth');
+const ctrl   = require('../controllers/boletimController');
 
-router.get('/:matricula', autenticar, buscarBoletim);
+router.use(auth);
+
+router.get('/:matricula', ctrl.getBoletim);
 
 module.exports = router;

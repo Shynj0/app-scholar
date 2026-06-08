@@ -1,259 +1,273 @@
-# App Scholar - Aplicativo Mobile de Gerenciamento de Boletim Acadêmico
+# 🎓 App Scholar
 
-## Descrição
+**Aplicativo Mobile de Gerenciamento de Boletim Acadêmico**  
+Fatec Jacareí · Desenvolvimento de Software Multiplataforma  
+Disciplina: Programação para Dispositivos Móveis I  
+Professor: André Olímpio
 
-App Scholar é um aplicativo mobile multiplataforma desenvolvido em React Native para gerenciamento de informações acadêmicas de instituições de ensino superior tecnológico. O sistema permite autenticação de usuários, cadastro de informações acadêmicas (alunos, professores e disciplinas) e consulta de boletins.
+---
 
-## Características Principais
-
-- **Autenticação de Usuários**: Tela de login com validação de campos
-- **Cadastro de Alunos**: Gerenciar informações completas de alunos (nome, matrícula, email, endereço, etc)
-- **Cadastro de Professores**: Registrar dados de professores (titulação, área de atuação, email)
-- **Cadastro de Disciplinas**: Criar e gerenciar disciplinas com informações de carga horária e professor responsável
-- **Consulta de Boletim**: Visualizar notas, médias e situação acadêmica
-- **Interface Responsiva**: Design limpo e organizado com navegação intuitiva
-
-## Tecnologias Utilizadas
-
-- **React Native 0.73.2** - Framework para desenvolvimento multiplataforma
-- **Expo** - Plataforma para desenvolvimento de apps em React Native
-- **React Navigation 6.1.9** - Sistema de navegação entre telas
-- **TypeScript** (opcional) - Tipagem estática opcional
-- **React Hooks** - useState, useEffect e useContext para gerenciamento de estado
-
-## Estrutura do Projeto
+## 📁 Estrutura do Projeto
 
 ```
 app-scholar/
-├── src/
-│   ├── components/          # Componentes reutilizáveis
-│   │   ├── Button.js
-│   │   ├── Input.js
-│   │   ├── Card.js
-│   │   └── Header.js
-│   ├── screens/             # Telas da aplicação
-│   │   ├── LoginScreen.js
-│   │   ├── DashboardScreen.js
-│   │   ├── StudentRegistrationScreen.js
-│   │   ├── TeacherRegistrationScreen.js
-│   │   ├── SubjectRegistrationScreen.js
-│   │   └── GradesViewScreen.js
-│   ├── contexts/            # Context API para estado global
-│   │   └── AuthContext.js
-│   ├── hooks/               # Hooks customizados
-│   │   ├── useStudents.js
-│   │   ├── useTeachers.js
-│   │   ├── useSubjects.js
-│   │   └── useGrades.js
-│   ├── styles/              # Estilos globais
-│   │   └── globalStyles.js
-│   └── navigation/          # Sistema de navegação
-│       └── Navigation.js
-├── App.js                   # Arquivo principal
-├── app.json                 # Configuração do Expo
-├── package.json             # Dependências do projeto
-└── README.md               # Este arquivo
+├── backend/              ← API REST (Node.js + Express + PostgreSQL)
+│   ├── controllers/      ← Lógica de negócio
+│   ├── routes/           ← Definição dos endpoints
+│   ├── database/         ← Schema SQL e scripts de setup
+│   ├── middleware/        ← JWT auth
+│   ├── server.js         ← Entrada do servidor
+│   └── .env.example      ← Variáveis de ambiente
+└── mobile/               ← App React Native (TypeScript + Expo)
+    ├── src/
+    │   ├── screens/      ← Telas do app
+    │   ├── components/   ← Componentes reutilizáveis
+    │   ├── services/     ← API, ViaCEP, IBGE
+    │   ├── context/      ← AuthContext (JWT + AsyncStorage)
+    │   ├── navigation/   ← Stack + Bottom Tab Navigator
+    │   ├── hooks/        ← Custom hooks (useIBGE)
+    │   └── styles/       ← Tema / Design System
+    └── App.tsx           ← Componente raiz
 ```
 
-## Instalação
+---
 
-### Pré-requisitos
+## 🚀 Pré-requisitos
 
-- Node.js 14+ instalado
-- npm ou yarn instalado
-- Expo CLI instalado (`npm install -g expo-cli`)
+- Node.js 18+
+- PostgreSQL 14+
+- Expo CLI: `npm install -g expo-cli`
+- Expo Go (celular) **ou** emulador Android/iOS
 
-### Passos de Instalação
+---
 
-1. **Clone ou extraia o projeto:**
+## ⚙️ 1. Backend — Configuração
+
+### 1.1 Instalar dependências
+
 ```bash
-cd app-scholar
-```
-
-2. **Instale as dependências:**
-```bash
+cd backend
 npm install
 ```
 
-ou com yarn:
-```bash
-yarn install
+### 1.2 Criar banco de dados no PostgreSQL
+
+```sql
+CREATE DATABASE app_scholar;
 ```
 
-3. **Inicie o servidor Expo:**
+### 1.3 Configurar variáveis de ambiente
+
 ```bash
+cp .env.example .env
+```
+
+Edite o arquivo `.env`:
+
+```env
+PORT=3000
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=sua_senha_aqui
+DB_NAME=app_scholar
+JWT_SECRET=app_scholar_jwt_secret_super_seguro_2024
+JWT_EXPIRES_IN=7d
+```
+
+### 1.4 Executar o setup do banco (schema + dados iniciais)
+
+```bash
+npm run setup
+```
+
+Isso criará todas as tabelas e inserirá dados de exemplo.
+
+**Credenciais padrão criadas:**
+| Campo  | Valor                    |
+|--------|--------------------------|
+| E-mail | admin@appscholar.com     |
+| Senha  | admin123                 |
+
+### 1.5 Iniciar o servidor
+
+```bash
+# Produção
 npm start
+
+# Desenvolvimento (com hot-reload)
+npm run dev
 ```
 
-ou com yarn:
+O servidor estará em: **http://localhost:3000**
+
+---
+
+## 📱 2. App Mobile — Configuração
+
+### 2.1 Instalar dependências
+
 ```bash
-yarn start
-```
-
-4. **Execute no emulador ou dispositivo:**
-
-Para Android:
-```bash
-npm run android
-```
-
-Para iOS:
-```bash
-npm run ios
-```
-
-Para Web:
-```bash
-npm run web
-```
-
-## Como Usar
-
-### Login
-
-1. Na tela inicial, insira um email e qualquer senha
-2. Clique em "Entrar"
-3. Você será redirecionado para o Dashboard
-
-### Cadastro de Alunos
-
-1. No Dashboard, clique em "Cadastro de Alunos"
-2. Clique em "+ Novo Aluno"
-3. Preencha todos os campos obrigatórios
-4. Clique em "Salvar"
-
-### Cadastro de Professores
-
-1. No Dashboard, clique em "Cadastro de Professores"
-2. Clique em "+ Novo Professor"
-3. Preencha os campos: Nome, Titulação, Área de Atuação, Tempo de Docência e Email
-4. Clique em "Salvar"
-
-### Cadastro de Disciplinas
-
-1. No Dashboard, clique em "Cadastro de Disciplinas"
-2. Clique em "+ Nova Disciplina"
-3. Preencha os campos: Nome da Disciplina, Carga Horária, Professor Responsável, Curso e Semestre
-4. Clique em "Salvar"
-
-### Visualização de Boletim
-
-1. No Dashboard, clique em "Consulta de Boletim"
-2. Visualize a Média Geral (GPA)
-3. Veja o resumo de disciplinas aprovadas, em recuperação e reprovadas
-4. Consulte as notas detalhadas de cada disciplina
-
-## Dados de Demonstração
-
-O aplicativo vem com dados pré-carregados para demonstração:
-
-**Alunos:**
-- João Silva (ENG001)
-- Maria Santos (ENG002)
-
-**Professores:**
-- Dr. Carlos Ferreira (Doutorado em Engenharia de Software)
-- Dra. Ana Paula (Mestrado em Banco de Dados)
-
-**Disciplinas:**
-- Programação I (60 horas, 1º Semestre)
-- Banco de Dados (60 horas, 2º Semestre)
-- Engenharia de Software (80 horas, 3º Semestre)
-
-**Notas:**
-- Programação I: Nota 1: 8.5, Nota 2: 9.0 (Aprovado)
-- Banco de Dados: Nota 1: 7.5, Nota 2: 8.0 (Aprovado)
-- Engenharia de Software: Nota 1: 6.0, Nota 2: 5.5 (Reprovado)
-
-## Conceitos Implementados
-
-### UI/UX Mobile
-✅ Layout limpo e organizado
-✅ Navegação intuitiva
-✅ Boa legibilidade
-✅ Feedback visual para ações
-✅ Validação de campos de formulário
-✅ Uso adequado de cores e espaçamentos
-✅ Componentes reutilizáveis
-✅ Padronização de botões e inputs
-
-### Hooks do React
-✅ **useState** - Gerenciamento de estados de formulários, dados temporários e controle de telas
-✅ **useEffect** - Inicialização de telas e carregamento de dados simulados
-✅ **useContext** - Gerenciamento de estado de autenticação e informações do usuário
-
-### Telas Desenvolvidas
-✅ Tela de Login
-✅ Tela Inicial (Dashboard)
-✅ Tela de Cadastro de Alunos
-✅ Tela de Cadastro de Professores
-✅ Tela de Cadastro de Disciplinas
-✅ Tela de Visualização de Boletim
-
-## Validações Implementadas
-
-- Email válido (deve conter @)
-- Campos obrigatórios
-- Mensagens de erro contextualizadas
-- Feedback visual de erros em campos
-
-## Cores Utilizadas
-
-- **Primário**: #1E40AF (Azul)
-- **Sucesso**: #10B981 (Verde)
-- **Perigo**: #EF4444 (Vermelho)
-- **Aviso**: #F59E0B (Amarelo)
-- **Neutro**: Tons de cinza
-
-## Proximos Passos (Parte 2)
-
-A Parte 2 do projeto deverá incluir:
-- Integração com API REST (Node.js)
-- Conexão com banco de dados PostgreSQL
-- Armazenamento persistente de dados
-- Autenticação real com tokens JWT
-- Sincronização com servidor
-
-## Troubleshooting
-
-### Erro: "Module not found"
-```bash
+cd mobile
 npm install
 ```
 
-### Erro ao iniciar no iOS
-```bash
-rm -rf node_modules Podfile.lock
-npm install
-cd ios && pod install && cd ..
-npm run ios
+### 2.2 Configurar a URL da API
+
+Edite o arquivo `src/services/api.ts` e ajuste a `BASE_URL`:
+
+```typescript
+// Emulador Android
+const BASE_URL = 'http://10.0.2.2:3000';
+
+// Emulador iOS / Web
+const BASE_URL = 'http://localhost:3000';
+
+// Dispositivo físico → use o IP da sua máquina:
+const BASE_URL = 'http://192.168.1.xxx:3000';
 ```
 
-### Erro ao iniciar no Android
+> 💡 Para descobrir seu IP: `ipconfig` (Windows) ou `ifconfig` / `ip a` (Linux/Mac)
+
+### 2.3 Iniciar o app
+
 ```bash
-npm run android
+npx expo start
 ```
 
-Se persistir, limpe o cache:
-```bash
-npm start -- -c
+- Escaneie o QR com o app **Expo Go** (Android/iOS)
+- Pressione `a` para emulador Android
+- Pressione `i` para simulador iOS
+- Pressione `w` para rodar no navegador (React Native Web)
+
+---
+
+## 🌐 APIs implementadas
+
+### APIs do Backend
+
+| Método | Endpoint                    | Descrição              | Auth |
+|--------|-----------------------------|------------------------|------|
+| POST   | `/api/login`                | Autenticação JWT       | ❌   |
+| GET    | `/api/alunos`               | Listar alunos          | ✅   |
+| POST   | `/api/alunos`               | Cadastrar aluno        | ✅   |
+| PUT    | `/api/alunos/:id`           | Atualizar aluno        | ✅   |
+| DELETE | `/api/alunos/:id`           | Remover aluno          | ✅   |
+| GET    | `/api/professores`          | Listar professores     | ✅   |
+| POST   | `/api/professores`          | Cadastrar professor    | ✅   |
+| GET    | `/api/disciplinas`          | Listar disciplinas     | ✅   |
+| POST   | `/api/disciplinas`          | Cadastrar disciplina   | ✅   |
+| GET    | `/api/notas`                | Listar notas           | ✅   |
+| POST   | `/api/notas`                | Lançar notas           | ✅   |
+| PUT    | `/api/notas/:id`            | Atualizar notas        | ✅   |
+| GET    | `/api/boletim/:matricula`   | Consultar boletim      | ✅   |
+
+### APIs Externas
+
+| API               | Uso                                           |
+|-------------------|-----------------------------------------------|
+| **ViaCEP**        | Preenchimento automático de endereço por CEP  |
+| **IBGE Localidades** | Lista de estados para seleção no cadastro  |
+
+---
+
+## 📱 Telas do App
+
+| Tela                      | Descrição                                    |
+|---------------------------|----------------------------------------------|
+| **Login**                 | Autenticação com JWT, validação de campos    |
+| **Dashboard**             | Painel principal com cards de navegação      |
+| **Cadastro de Alunos**    | Formulário completo com auto-fill por CEP    |
+| **Cadastro de Professores** | Formulário com chips de titulação          |
+| **Cadastro de Disciplinas** | Formulário com seleção de professor        |
+| **Lançamento de Notas**   | Busca de aluno, seleção de disciplina, notas |
+| **Boletim**               | Relatório de notas com filtro por semestre   |
+
+---
+
+## 🧰 Tecnologias
+
+### Backend
+- **Node.js** + **Express.js**
+- **PostgreSQL** (pg)
+- **JWT** (jsonwebtoken)
+- **Bcrypt** (bcryptjs)
+- **CORS**, **dotenv**
+
+### Frontend
+- **React Native** + **Expo**
+- **TypeScript**
+- **React Navigation** (Stack + Bottom Tabs)
+- **Axios** (HTTP requests)
+- **AsyncStorage** (persistência do token)
+- **@expo/vector-icons** (Ionicons)
+
+### APIs Externas
+- **ViaCEP**: https://viacep.com.br/ws/{cep}/json/
+- **IBGE Localidades**: https://servicodados.ibge.gov.br/api/v1/localidades/estados
+
+---
+
+## 🗃️ Banco de Dados
+
+```sql
+usuarios      → autenticação (email, senha hash, perfil)
+alunos        → dados do aluno + endereço
+professores   → dados do professor
+disciplinas   → nome, carga horária, professor, curso, semestre
+notas         → nota1, nota2, média (auto), situação (auto)
 ```
 
-## Autores
+A **média** e a **situação** são calculadas automaticamente:
+- `média = (nota1 + nota2) / 2`
+- `situação = média >= 5 ? 'Aprovado' : 'Reprovado'`
 
-Desenvolvido para a disciplina de Programação para Dispositivos Móveis I
-Professor: André Olímpio
-Instituição: FATEC Jacareí
+---
 
-## Licença
+## 🔑 Hooks React utilizados
 
-Este projeto é fornecido como atividade avaliativa da disciplina e pode ser usado para fins educacionais.
+| Hook        | Uso                                               |
+|-------------|---------------------------------------------------|
+| `useState`  | Formulários, loading, modais, dados da tela       |
+| `useEffect` | Carregamento de dados, inicialização, IBGE        |
+| `useContext`| Autenticação global (AuthContext)                 |
 
-## Suporte
+---
 
-Para dúvidas ou problemas:
-1. Verifique se todas as dependências foram instaladas corretamente
-2. Limpe o cache do Expo: `npm start -- -c`
-3. Reinicie o servidor de desenvolvimento
-4. Consulte a documentação oficial de React Native: https://reactnative.dev
-5. Consulte a documentação do Expo: https://docs.expo.dev
+## 📋 Exemplo de resposta — Boletim
+
+```json
+{
+  "success": true,
+  "data": {
+    "aluno": {
+      "nome": "Maria Souza",
+      "matricula": "2024001",
+      "curso": "DSM",
+      "email": "maria.souza@email.com"
+    },
+    "disciplinas": [
+      {
+        "disciplina": "Programação para Dispositivos Móveis I",
+        "nota1": 8.5,
+        "nota2": 7.0,
+        "media": 7.75,
+        "situacao": "Aprovado"
+      }
+    ],
+    "resumo": {
+      "total": 3,
+      "aprovados": 2,
+      "reprovados": 1,
+      "cursando": 0,
+      "media_geral": "6.92"
+    }
+  }
+}
+```
+
+---
+
+> Projeto desenvolvido para a disciplina **Programação para Dispositivos Móveis I**  
+> Fatec Jacareí · Curso de Desenvolvimento de Software Multiplataforma  
+> Professor: André Olímpio

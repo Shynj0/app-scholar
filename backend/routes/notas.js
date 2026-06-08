@@ -1,11 +1,13 @@
-const express = require('express');
-const router = express.Router();
-const ctrl = require('../controllers/notasController');
-const { autenticar } = require('../middleware/auth');
+const router = require('express').Router();
+const auth   = require('../middleware/auth');
+const ctrl   = require('../controllers/notasController');
 
-router.get('/', autenticar, ctrl.listar);
-router.get('/aluno/:aluno_id', autenticar, ctrl.buscarPorAluno);
-router.post('/', autenticar, ctrl.criar);
-router.put('/:id', autenticar, ctrl.atualizar);
+router.use(auth);
+
+router.get('/',               ctrl.getAll);
+router.get('/aluno/:alunoId', ctrl.getByAluno);
+router.post('/',              ctrl.create);
+router.put('/:id',            ctrl.update);
+router.delete('/:id',         ctrl.remove);
 
 module.exports = router;

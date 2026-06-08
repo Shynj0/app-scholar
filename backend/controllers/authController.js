@@ -1,105 +1,69 @@
+const pool   = require('../database/connection');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const pool = require('../database/connection');
-const { JWT_SECRET } = require('../middleware/auth');
+const jwt    = require('jsonwebtoken');
 
-// POST /api/login
-const login = async (req, res) => {
+const SECRET  = process.env.JWT_SECRET    || 'app_scholar_secret';
+const EXPIRES = process.env.JWT_EXPIRES_IN || '7d';
+
+// ─── POST /api/login ─────────────────────────────────────────────────────────
+exports.login = async (req, res) => {
   const { email, senha } = req.body;
 
-  if (!email || !senha) {
-    return res.status(400).json({ erro: 'Email e senha são obrigatórios.' });
-  }
+  if (!email || !senha)
+    return res.status(400).json({ success: false, message: 'E-mail e senha são obrigatórios' });
 
   try {
-    const result = await pool.query(
-      'SELECT * FROM usuarios WHERE email = $1',
-      [email]
+    const { rows } = await pool.query(
+      'SELECT * FROM usuarios WHERE email = $1', [email.trim().toLowerCase()]
     );
 
-    if (result.rows.length === 0) {
-      return res.status(401).json({ erro: 'Credenciais inválidas.' });
-    }
+    if (!rows.length)
+      return res.status(401).json({ success: false, message: 'Credenciais inválidas' });
 
-    const usuario = result.rows[0];
-    const senhaValida = await bcrypt.compare(senha, usuario.senha_hash);
-
-    if (!senhaValida) {
-      return res.status(401).json({ erro: 'Credenciais inválidas.' });
-    }
-
-    // Buscar nome do usuário conforme perfil
-    let nome = 'Usuário';
-    if (usuario.perfil === 'aluno') {
-      const aluno = await pool.query(
-        'SELECT nome FROM alunos WHERE usuario_id = $1',
-        [usuario.id]
-      );
-      if (aluno.rows.length > 0) nome = aluno.rows[0].nome;
-    } else if (usuario.perfil === 'professor') {
-      const prof = await pool.query(
-        'SELECT nome FROM professores WHERE usuario_id = $1',
-        [usuario.id]
-      );
-      if (prof.rows.length > 0) nome = prof.rows[0].nome;
-    } else {
-      nome = 'Administrador';
-    }
+    const user = rows[0];
+    const valid = await bcrypt.compare(senha, user.senha);
+    if (!valid)
+      return res.status(401).json({ success: false, message: 'Credenciais inválidas' });
 
     const token = jwt.sign(
-      { id: usuario.id, email: usuario.email, perfil: usuario.perfil },
-      JWT_SECRET,
-      { expiresIn: '8h' }
+      { id: user.id, email: user.email, perfil: user.perfil, nome: user.nome },
+      SECRET,
+      { expiresIn: EXPIRES }
     );
 
-    return res.json({
+    res.json({
+      success: true,
       token,
-      usuario: {
-        id: usuario.id,
-        nome,
-        email: usuario.email,
-        perfil: usuario.perfil,
-      },
+      usuario: { id: user.id, nome: user.nome, email: user.email, perfil: user.perfil },
     });
   } catch (err) {
-    console.error('Erro no login:', err);
-    return res.status(500).json({ erro: 'Erro interno do servidor.' });
+    console.error('[authController.login]', err);
+    res.status(500).json({ success: false, message: 'Erro interno do servidor' });
   }
 };
 
-// POST /api/registro
-const registro = async (req, res) => {
-  const { email, senha, perfil } = req.body;
+// ─── POST /api/register ──────────────────────────────────────────────────────
+exports.register = async (req, res) => {
+  const { nome, email, senha, perfil = 'admin' } = req.body;
 
-  if (!email || !senha || !perfil) {
-    return res.status(400).json({ erro: 'Email, senha e perfil são obrigatórios.' });
-  }
-
-  if (!['aluno', 'professor', 'admin'].includes(perfil)) {
-    return res.status(400).json({ erro: 'Perfil inválido.' });
-  }
+  if (!nome || !email || !senha)
+    return res.status(400).json({ success: false, message: 'Todos os campos são obrigatórios' });
 
   try {
-    const existe = await pool.query('SELECT id FROM usuarios WHERE email = $1', [email]);
-    if (existe.rows.length > 0) {
-      return res.status(409).json({ erro: 'E-mail já cadastrado.' });
-    }
+    const exists = await pool.query('SELECT id FROM usuarios WHERE email=$1', [email]);
+    if (exists.rows.length)
+      return res.status(409).json({ success: false, message: 'E-mail já cadastrado' });
 
-    const senhaHash = await bcrypt.hash(senha, 10);
-
-    const result = await pool.query(
-      'INSERT INTO usuarios (email, senha_hash, perfil) VALUES ($1, $2, $3) RETURNING id, email, perfil',
-      [email, senhaHash, perfil]
+    const hash = await bcrypt.hash(senha, 10);
+    const { rows } = await pool.query(
+      `INSERT INTO usuarios (nome,email,senha,perfil) VALUES ($1,$2,$3,$4)
+       RETURNING id,nome,email,perfil,created_at`,
+      [nome, email.trim().toLowerCase(), hash, perfil]
     );
 
-    return res.status(201).json({
-      mensagem: 'Usuário criado com sucesso.',
-      usuario: result.rows[0],
-    });
+    res.status(201).json({ success: true, message: 'Usuário criado com sucesso', data: rows[0] });
   } catch (err) {
-    console.error('Erro no registro:', err);
-    return res.status(500).json({ erro: 'Erro interno do servidor.' });
+    console.error('[authController.register]', err);
+    res.status(500).json({ success: false, message: 'Erro interno do servidor' });
   }
 };
-
-module.exports = { login, registro };

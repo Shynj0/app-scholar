@@ -1,22 +1,18 @@
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'appscholar_secret_2024';
+module.exports = function authMiddleware(req, res, next) {
+  const header = req.headers.authorization;
 
-const autenticar = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
-
-  if (!token) {
-    return res.status(401).json({ erro: 'Token não fornecido. Acesso negado.' });
+  if (!header || !header.startsWith('Bearer ')) {
+    return res.status(401).json({ success: false, message: 'Token não fornecido' });
   }
+
+  const token = header.slice(7);
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    req.usuario = decoded;
+    req.user = jwt.verify(token, process.env.JWT_SECRET || 'app_scholar_secret');
     next();
-  } catch (err) {
-    return res.status(403).json({ erro: 'Token inválido ou expirado.' });
+  } catch {
+    return res.status(401).json({ success: false, message: 'Token inválido ou expirado' });
   }
 };
-
-module.exports = { autenticar, JWT_SECRET };

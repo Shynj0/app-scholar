@@ -1,31 +1,38 @@
-require('dotenv').config(); // Essencial para ler o arquivo .env
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+
 const app = express();
 
-app.use(cors());
+// ─── Middlewares ─────────────────────────────────────────────────────────────
+app.use(cors({ origin: '*', methods: ['GET', 'POST', 'PUT', 'DELETE'] }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Rotas
-const authRoutes = require('./routes/auth');
-const alunosRoutes = require('./routes/alunos');
-const professoresRoutes = require('./routes/professores');
-const disciplinasRoutes = require('./routes/disciplinas');
-const notasRoutes = require('./routes/notas');
-const boletimRoutes = require('./routes/boletim');
+// ─── Rotas ───────────────────────────────────────────────────────────────────
+app.use('/api',           require('./routes/auth'));
+app.use('/api/alunos',       require('./routes/alunos'));
+app.use('/api/professores',  require('./routes/professores'));
+app.use('/api/disciplinas',  require('./routes/disciplinas'));
+app.use('/api/notas',        require('./routes/notas'));
+app.use('/api/boletim',      require('./routes/boletim'));
 
-app.use('/api', authRoutes);
-app.use('/api/alunos', alunosRoutes);
-app.use('/api/professores', professoresRoutes);
-app.use('/api/disciplinas', disciplinasRoutes);
-app.use('/api/notas', notasRoutes);
-app.use('/api/boletim', boletimRoutes);
+// ─── Health Check ─────────────────────────────────────────────────────────────
+app.get('/api/health', (_req, res) =>
+  res.json({ status: 'OK', message: '🎓 App Scholar API funcionando!' })
+);
 
-app.get('/', (req, res) => {
-  res.json({ mensagem: 'App Scholar API está rodando!' });
-});
+// ─── 404 ──────────────────────────────────────────────────────────────────────
+app.use((_req, res) =>
+  res.status(404).json({ success: false, message: 'Rota não encontrada' })
+);
 
+// ─── Inicialização ────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
+  console.log(`\n🎓 App Scholar Backend`);
+  console.log(`🚀 Servidor rodando em: http://localhost:${PORT}`);
+  console.log(`📋 Health check:       http://localhost:${PORT}/api/health\n`);
 });
+
+module.exports = app;

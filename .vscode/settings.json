@@ -5,11 +5,10 @@
             "previewLimit": 50,
             "server": "localhost",
             "port": 5432,
-            "askForPassword": true,
             "driver": "PostgreSQL",
-            "name": "App Scholar",
-            "database": "app_scholar",
-            "username": "postgres"
+            "name": "App_scholar",
+            "username": "postgres",
+            "database": "app_scholar"
         }
     ]
 }
