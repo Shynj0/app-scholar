@@ -1,15 +1,22 @@
+require('dotenv').config(); // Carrega as variáveis do arquivo .env (apenas para ambiente local)
 const { Pool } = require('pg');
-require('dotenv').config();
 
+// Configuração do Pool de Conexão
 const pool = new Pool({
-  host:     process.env.DB_HOST     || 'localhost',
-  port:     Number(process.env.DB_PORT) || 5432,
-  user:     process.env.DB_USER     || 'postgres',
-  password: process.env.DB_PASSWORD || 'postgres',
-  database: process.env.DB_NAME     || 'app_scholar',
+  connectionString: process.env.DATABASE_URL, // Lê a variável do Render
+  ssl: {
+    rejectUnauthorized: false, // Obrigatório para o Neon, que usa certificados autoassinados
+  },
 });
 
-pool.on('connect', () => console.log('✅ PostgreSQL conectado'));
-pool.on('error',   (err) => { console.error('❌ Erro no DB:', err); process.exit(-1); });
+// Teste de conexão (ajuda a diagnosticar erros no log do Render)
+pool.connect((err, client, release) => {
+  if (err) {
+    console.error('❌ Erro ao conectar ao banco de dados:', err.stack);
+  } else {
+    console.log('✅ Conectado ao banco de dados Neon com sucesso!');
+    release(); // Libera o cliente de volta para o pool após o teste
+  }
+});
 
 module.exports = pool;
