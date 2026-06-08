@@ -10,12 +10,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ─── Rotas ───────────────────────────────────────────────────────────────────
-app.use('/api',           require('./routes/auth'));
+app.use('/api',              require('./routes/auth'));
 app.use('/api/alunos',       require('./routes/alunos'));
 app.use('/api/professores',  require('./routes/professores'));
 app.use('/api/disciplinas',  require('./routes/disciplinas'));
 app.use('/api/notas',        require('./routes/notas'));
 app.use('/api/boletim',      require('./routes/boletim'));
+app.use('/api/professor',    require('./routes/professor.routes')); 
+app.use('/api/aluno',        require('./routes/aluno.routes'));
 
 // ─── Health Check ─────────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) =>

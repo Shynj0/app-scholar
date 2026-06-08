@@ -1,101 +1,93 @@
 import React from 'react';
-import { NavigationContainer }       from '@react-navigation/native';
-import { createStackNavigator }      from '@react-navigation/stack';
-import { createBottomTabNavigator }  from '@react-navigation/bottom-tabs';
-import { Ionicons }                  from '@expo/vector-icons';
-import { ActivityIndicator, View }   from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { ActivityIndicator, View } from 'react-native';
 
-import { useAuth }             from '../context/AuthContext';
-import { colors }              from '../styles/theme';
+import { useAuth } from '../context/AuthContext';
+import { colors } from '../styles/theme';
 
-import LoginScreen             from '../screens/LoginScreen';
-import DashboardScreen         from '../screens/DashboardScreen';
-import BoletimScreen           from '../screens/BoletimScreen';
-import CadastroAlunosScreen    from '../screens/CadastroAlunosScreen';
+// Importações (Mantendo as que você já tinha)
+import LoginScreen from '../screens/LoginScreen';
+import DashboardScreen from '../screens/DashboardScreen';
+import CadastroAlunosScreen from '../screens/CadastroAlunosScreen';
 import CadastroProfessoresScreen from '../screens/CadastroProfessoresScreen';
 import CadastroDisciplinasScreen from '../screens/CadastroDisciplinasScreen';
-import NotasScreen             from '../screens/NotasScreen';
+import BoletimScreen from '../screens/BoletimScreen';
+import NotasScreen from '../screens/NotasScreen';
 
-import {
-  AppStackParamList,
-  TabParamList,
-  AuthStackParamList,
-} from './types';
+import ProfessorDashboardScreen from '../screens/ProfessorDashboardScreen';
+import ProfessorDisciplinasScreen from '../screens/ProfessorDisciplinasScreen';
+import ProfessorAlunosScreen from '../screens/ProfessorAlunosScreen';
 
+import AlunoDashboardScreen from '../screens/AlunoDashboardScreen';
+import AlunoDisciplinasScreen from '../screens/AlunoDisciplinasScreen'; // Nova Importação
+import AlunosBoletimScreen from '../screens/AlunoBoletimScreen';     // Nova Importação
+
+import { AdmStackParamList, ProfStackParamList, AlunoStackParamList, AuthStackParamList } from './types';
+
+const AdmStack = createStackNavigator<AdmStackParamList>();
+const ProfStack = createStackNavigator<ProfStackParamList>();
+const AlunoStack = createStackNavigator<AlunoStackParamList>();
 const AuthStack = createStackNavigator<AuthStackParamList>();
-const AppStack  = createStackNavigator<AppStackParamList>();
-const Tab       = createBottomTabNavigator<TabParamList>();
 
-// ─── Bottom Tabs ──────────────────────────────────────────────────────────────
-function MainTabs() {
+function AdmNavigator() {
   return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
-        headerShown: false,
-        tabBarActiveTintColor:   colors.primary,
-        tabBarInactiveTintColor: colors.gray[500],
-        tabBarStyle: {
-          backgroundColor: colors.surface,
-          borderTopColor:  colors.border,
-          height: 60,
-          paddingBottom: 8,
-        },
-        tabBarIcon: ({ focused, color, size }) => {
-          const icons: Record<string, [string, string]> = {
-            Dashboard: ['home',         'home-outline'],
-            Boletim:   ['document-text','document-text-outline'],
-          };
-          const [active, inactive] = icons[route.name] ?? ['apps', 'apps-outline'];
-          return <Ionicons name={(focused ? active : inactive) as any} size={size} color={color} />;
-        },
-        tabBarLabel: route.name === 'Dashboard' ? 'Início' : 'Boletim',
-      })}
-    >
-      <Tab.Screen name="Dashboard" component={DashboardScreen} />
-      <Tab.Screen name="Boletim"   component={BoletimScreen} />
-    </Tab.Navigator>
+    <AdmStack.Navigator screenOptions={{ headerShown: false, cardStyle: { backgroundColor: colors.background } }}>
+      <AdmStack.Screen name="AdmDashboard" component={DashboardScreen} />
+      <AdmStack.Screen name="CadastroAlunos" component={CadastroAlunosScreen} />
+      <AdmStack.Screen name="CadastroProfessores" component={CadastroProfessoresScreen} />
+      <AdmStack.Screen name="CadastroDisciplinas" component={CadastroDisciplinasScreen} />
+      <AdmStack.Screen name="Notas" component={NotasScreen} />
+      <AdmStack.Screen name="Boletim" component={BoletimScreen} />
+    </AdmStack.Navigator>
   );
 }
 
-// ─── App Stack (autenticado) ──────────────────────────────────────────────────
-function AppNavigatorStack() {
+function ProfessorNavigator() {
   return (
-    <AppStack.Navigator
-      screenOptions={{
-        headerShown: false,
-        cardStyle: { backgroundColor: colors.background },
-      }}
-    >
-      <AppStack.Screen name="MainTabs"            component={MainTabs} />
-      <AppStack.Screen name="CadastroAlunos"      component={CadastroAlunosScreen} />
-      <AppStack.Screen name="CadastroProfessores" component={CadastroProfessoresScreen} />
-      <AppStack.Screen name="CadastroDisciplinas" component={CadastroDisciplinasScreen} />
-      <AppStack.Screen name="Notas"               component={NotasScreen} />
-    </AppStack.Navigator>
+    <ProfStack.Navigator screenOptions={{ headerShown: false, cardStyle: { backgroundColor: colors.background } }}>
+      <ProfStack.Screen name="ProfessorDashboard" component={ProfessorDashboardScreen} />
+      <ProfStack.Screen name="ProfDisciplinas" component={ProfessorDisciplinasScreen} />
+      <ProfStack.Screen name="ProfAlunos" component={ProfessorAlunosScreen} />
+      <ProfStack.Screen name="ProfNotas" component={NotasScreen} />
+    </ProfStack.Navigator>
   );
 }
 
-// ─── Root Navigator ───────────────────────────────────────────────────────────
+function AlunoNavigator() {
+  return (
+    <AlunoStack.Navigator screenOptions={{ headerShown: false, cardStyle: { backgroundColor: colors.background } }}>
+      <AlunoStack.Screen name="AlunoDashboard" component={AlunoDashboardScreen} />
+      {/* Registrando as novas telas abaixo */}
+      <AlunoStack.Screen name="AlunoDisciplinas" component={AlunoDisciplinasScreen} />
+      <AlunoStack.Screen name="AlunoBoletim" component={AlunosBoletimScreen} />
+    </AlunoStack.Navigator>
+  );
+}
+
 export default function AppNavigator() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, usuario } = useAuth();
+  
+  if (isLoading) return (
+    <View style={{ flex: 1, justifyContent: 'center', backgroundColor: colors.background }}>
+      <ActivityIndicator size="large" color={colors.primary} />
+    </View>
+  );
 
-  if (isLoading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.primary }}>
-        <ActivityIndicator size="large" color="#fff" />
-      </View>
-    );
-  }
+  const renderNav = () => {
+    const perfil = usuario?.perfil?.toLowerCase().trim();
+    if (perfil === 'adm' || perfil === 'admin') return <AdmNavigator />;
+    if (perfil === 'professor') return <ProfessorNavigator />;
+    return <AlunoNavigator />;
+  };
 
   return (
     <NavigationContainer>
-      {isAuthenticated ? (
-        <AppNavigatorStack />
-      ) : (
+      {!isAuthenticated ? (
         <AuthStack.Navigator screenOptions={{ headerShown: false }}>
           <AuthStack.Screen name="Login" component={LoginScreen} />
         </AuthStack.Navigator>
-      )}
+      ) : renderNav()}
     </NavigationContainer>
   );
 }

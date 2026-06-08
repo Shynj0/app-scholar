@@ -78,7 +78,20 @@ const styles = StyleSheet.create({
   },
   inputError:  { borderColor: colors.danger },
   icon:        { marginRight: spacing.sm },
-  input:       { flex: 1, fontSize: fontSize.base, color: colors.text.primary, paddingVertical: 12 },
+  
+  // ─── ALINHAMENTO DO INPUT SEM CORTES ───────────────────────────────────────
+  input: {
+    flex: 1,
+    fontSize: fontSize.base,
+    color: colors.text.primary,
+    
+    // Mudanças aqui:
+    paddingVertical: 0,          // Remove o padding interno que causava o corte no Android
+    alignSelf: 'stretch',        // Estica o campo verticalmente para aumentar a área de toque
+    includeFontPadding: false,   // Remove o espaçamento extra de segurança do Android
+    textAlignVertical: 'center', // Garante que o texto fique perfeitamente centralizado
+  },
+  
   eyeBtn:      { padding: 4, marginLeft: spacing.xs },
   rightIcon:   { marginLeft: spacing.sm },
   errorText:   { fontSize: fontSize.xs, color: colors.danger, marginTop: 4, marginLeft: 2 },

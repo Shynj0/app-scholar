@@ -7,22 +7,20 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { colors, spacing, fontSize, radius, shadow } from '../styles/theme';
-import type { CompositeNavigationProp } from '@react-navigation/native';
-import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { StackNavigationProp } from '@react-navigation/stack';
-import type { AppStackParamList, TabParamList } from '../navigation/types';
+// ✅ Corrigido: Importando AdmStackParamList que é o correto
+import type { AdmStackParamList } from '../navigation/types';
 
-type Nav = CompositeNavigationProp<
-  BottomTabNavigationProp<TabParamList, 'Dashboard'>,
-  StackNavigationProp<AppStackParamList>
->;
+// ✅ Simplificado: Como as rotas são de uma Stack, usamos apenas StackNavigationProp
+type Nav = StackNavigationProp<AdmStackParamList>;
 
 interface Card {
   title: string;
   subtitle: string;
   icon: keyof typeof Ionicons.glyphMap;
   color: string;
-  screen: keyof AppStackParamList | 'Boletim';
+  // ✅ Corrigido para refletir o nome correto do parâmetro de rotas do ADM
+  screen: keyof AdmStackParamList | 'Boletim';
 }
 
 const CARDS: Card[] = [
@@ -59,7 +57,7 @@ export default function DashboardScreen() {
     if (screen === 'Boletim') {
       (navigation as any).navigate('Boletim');
     } else {
-      navigation.navigate(screen as keyof AppStackParamList);
+      navigation.navigate(screen as keyof AdmStackParamList);
     }
   };
 
@@ -105,7 +103,8 @@ export default function DashboardScreen() {
         <View style={styles.grid}>
           {CARDS.map(card => (
             <TouchableOpacity
-              key={card.screen}
+              // ✅ Corrigido: Usando card.title (string pura) para evitar conflito de tipo no key
+              key={card.title}
               style={[styles.card, { borderTopColor: card.color }]}
               onPress={() => handleNav(card.screen)}
               activeOpacity={0.8}
@@ -123,7 +122,7 @@ export default function DashboardScreen() {
         </View>
 
         <Text style={styles.footer}>
-          Prof. André Olímpio · PDM I · 2024
+          João Pedro Anjos · PDM I · 2026
         </Text>
       </ScrollView>
     </View>

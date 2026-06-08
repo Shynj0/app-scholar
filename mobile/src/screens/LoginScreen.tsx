@@ -110,7 +110,7 @@ export default function LoginScreen() {
           </View>
 
           <Text style={styles.footer}>
-            PDM I · Prof. André Olímpio · 2024
+            PDM I · João Pedro Anjos · 2026
           </Text>
         </ScrollView>
       </KeyboardAvoidingView>

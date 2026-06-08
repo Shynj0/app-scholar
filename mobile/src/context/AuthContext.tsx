@@ -3,17 +3,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../services/api';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
-interface Usuario {
+export interface Usuario {
   id:     number;
   nome:   string;
   email:  string;
-  perfil: string;
+  perfil: 'adm' | 'professor' | 'aluno'; 
 }
 
 interface AuthContextData {
-  usuario:       Usuario | null;
-  token:         string | null;
-  isLoading:     boolean;
+  usuario:         Usuario | null;
+  token:           string | null;
+  isLoading:       boolean;
   isAuthenticated: boolean;
   login:  (email: string, senha: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -63,15 +63,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
-  try {
-    await AsyncStorage.multiRemove(['@scholar_token', '@scholar_usuario']);
-  } catch (e) {
-    console.warn('Erro ao limpar storage:', e);
-  } finally {
-    setToken(null);
-    setUsuario(null);
-  }
-};
+    try {
+      await AsyncStorage.multiRemove(['@scholar_token', '@scholar_usuario']);
+    } catch (e) {
+      console.warn('Erro ao limpar storage:', e);
+    } finally {
+      setToken(null);
+      setUsuario(null);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -88,7 +89,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// ─── Hook de conveniência ─────────────────────────────────────────────────────
 export function useAuth() {
   return useContext(AuthContext);
 }
