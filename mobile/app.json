@@ -1,15 +1,17 @@
 {
   "expo": {
-    "name":   "App Scholar",
-    "slug":   "app-scholar",
+    "name": "App Scholar",
+    "slug": "app-scholar",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "splash": {
-      "resizeMode":      "contain",
+      "resizeMode": "contain",
       "backgroundColor": "#1a237e"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "br.edu.fatec.appscholar"
@@ -22,6 +24,11 @@
     },
     "web": {
       "bundler": "metro"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "45d134e8-b0ba-4793-96c0-84029c7b658f"
+      }
     }
   }
 }
