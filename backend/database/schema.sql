@@ -96,3 +96,13 @@ CREATE TRIGGER trg_alunos_upd      BEFORE UPDATE ON alunos      FOR EACH ROW EXE
 CREATE TRIGGER trg_professores_upd BEFORE UPDATE ON professores FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 CREATE TRIGGER trg_disciplinas_upd BEFORE UPDATE ON disciplinas FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 CREATE TRIGGER trg_notas_upd       BEFORE UPDATE ON notas       FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+
+
+
+
+
+ALTER TABLE usuarios ADD COLUMN reference_id INTEGER;
+
+ALTER TABLE notas 
+ADD CONSTRAINT aluno_disciplina_unique UNIQUE (aluno_id, disciplina_id);
