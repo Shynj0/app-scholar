@@ -76,21 +76,29 @@ exports.create = async (req, res) => {
     return res.status(400).json({ success: false, message: 'aluno_id e disciplina_id são obrigatórios' });
 
   const calc = calcSituacao(nota1, nota2);
-  const media    = typeof calc === 'object' ? calc.media    : null;
+  const media     = typeof calc === 'object' ? calc.media    : null;
   const situacao = typeof calc === 'object' ? calc.situacao : 'Cursando';
 
   try {
     const { rows } = await pool.query(
-      `INSERT INTO notas (aluno_id,disciplina_id,nota1,nota2,media,situacao)
-       VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
+      `INSERT INTO notas (aluno_id, disciplina_id, nota1, nota2, media, situacao)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       ON CONFLICT (aluno_id, disciplina_id) 
+       DO UPDATE SET
+         nota1 = EXCLUDED.nota1,
+         nota2 = EXCLUDED.nota2,
+         media = EXCLUDED.media,
+         situacao = EXCLUDED.situacao
+       RETURNING *`,
       [aluno_id, disciplina_id, nota1 ?? null, nota2 ?? null, media, situacao]
     );
-    res.status(201).json({ success: true, message: 'Nota registrada!', data: rows[0] });
+    
+    // Agora, tanto se ele criou quanto se ele atualizou, a resposta será de sucesso
+    res.status(200).json({ success: true, message: 'Nota processada com sucesso!', data: rows[0] });
+    
   } catch (err) {
-    if (err.code === '23505')
-      return res.status(409).json({ success: false, message: 'Nota já cadastrada para esse aluno/disciplina' });
-    console.error('[notasController.create]', err);
-    res.status(500).json({ success: false, message: 'Erro ao registrar nota' });
+    console.error('[notasController.create/upsert]', err);
+    res.status(500).json({ success: false, message: 'Erro ao processar nota' });
   }
 };
 
